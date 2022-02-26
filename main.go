@@ -13,7 +13,7 @@ type Env struct {
 }
 
 func main() {
-	fmt.Println("Main Started....")
+	log.Debug().Msg("Main Started....")
 	// Initialise the connection pool.
 	db, err := models.InitDB()
 	if err != nil {
@@ -23,9 +23,11 @@ func main() {
 	// Create an instance of Env containing the connection pool.
 	env := &Env{db: db}
 
-	// Use env.booksIndex as the handler function for the /books route.
 	http.HandleFunc("/employee", env.GetEmployees)
-	http.ListenAndServe(":8585", nil)
+	err = http.ListenAndServe(":8585", nil)
+	if err != nil {
+		log.Fatal().Msgf("%+v \n", err)
+	}
 }
 
 func (e *Env) GetEmployees(w http.ResponseWriter, req *http.Request) {
