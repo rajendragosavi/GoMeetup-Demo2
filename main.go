@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/rajendragosavi/GoMeetup-Demo2/models"
 	"github.com/rs/zerolog/log"
@@ -9,19 +8,22 @@ import (
 )
 
 type Env struct {
-	db *sql.DB
+	employee models.EmpInterface
 }
 
 func main() {
 	fmt.Println("Main Started....")
 	// Initialise the connection pool.
-	db, err := models.InitDB()
+	Db, err := models.InitDB()
 	if err != nil {
 		log.Fatal().Msgf("Error in creating DB connection - %v ", err)
 	}
 
+	defer Db.Close()
 	// Create an instance of Env containing the connection pool.
-	env := &Env{db: db}
+	env := &Env{employee: &models.EmployeeModel{
+		DB: Db,
+	}}
 
 	// Use env.booksIndex as the handler function for the /books route.
 	http.HandleFunc("/employee", env.GetEmployees)
@@ -29,11 +31,11 @@ func main() {
 }
 
 func (e *Env) GetEmployees(w http.ResponseWriter, req *http.Request) {
-	employeelist, err := models.GetAllEmployee()
+	employeelist, err := e.employee.GetAllEmployee()
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 	}
 	for _, i := range employeelist {
-		fmt.Fprintf(w, " %s, %s, %s,%s,%s \n", i.FirstName, i.LastName, i.Department, i.ProfessionalBand, i.Location)
+		fmt.Fprintf(w, "%s,%s,%s,%s,%s\n", i.FirstName, i.LastName, i.Department, i.ProfessionalBand, i.Location)
 	}
 }

@@ -15,6 +15,14 @@ type Employee struct {
 	Location         string
 }
 
+type EmployeeModel struct {
+	DB *sql.DB
+}
+
+type EmpInterface interface {
+	GetAllEmployee() ([]Employee, error)
+}
+
 func InitDB() (*sql.DB, error) {
 	log.Debug().Msg("Init DB function is running... \n")
 	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5432, "postgres", "password", "shopdb")
@@ -22,19 +30,20 @@ func InitDB() (*sql.DB, error) {
 	if err != nil {
 		log.Fatal().Msgf("error - %v \n", err)
 	}
-	defer Db.Close()
+	// defer Db.Close()
 	return Db, nil
 }
-func GetAllEmployee() ([]Employee, error) {
-	log.Debug().Msg("GetAllEmployee function is running..")
-	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5432, "postgres", "password", "shopdb")
-	DB, err := sql.Open("postgres", psqlconn)
-	if err != nil {
-		log.Fatal().Msgf("error - %v \n", err)
-	}
-	defer DB.Close()
 
-	rows, err := DB.Query("SELECT * FROM employee")
+func (e *EmployeeModel) GetAllEmployee() ([]Employee, error) {
+	log.Debug().Msg("GetAllEmployee function is running..")
+	//psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5432, "postgres", "password", "shopdb")
+	//DB, err := sql.Open("postgres", psqlconn)
+	//if err != nil {
+	//	log.Fatal().Msgf("error - %v \n", err)
+	//}
+	//defer DB.Close()
+
+	rows, err := e.DB.Query("SELECT * FROM employee")
 	if err != nil {
 		log.Fatal().Msgf("Error %v - ", err)
 	}
